@@ -54,5 +54,30 @@ def createTree(dataSet,leafType=regLeaf,errType=regErr,ops=(1,4)):
     retTree['right'] = createTree(rSet,leafType,errType,ops)
     return retTree
 
+#后剪枝
+def isTree(obj):
+    return (type(obj).__name__== 'dict')
+
+def getMean(tree):
+    if isTree(tree['right']):
+        tree['right'] = getMean(tree['right'])
+    if isTree(tree['left']):
+        tree['left'] = getMean(tree['left'])
+    return (tree['left'] + tree['right'])/2
+
+def prune(tree,testData):
+    if shape(testData)[0] == 0:
+        return  getMean(tree)
+    if (isTree(tree['right']) or isTree(tree['left'])):
+        lSet,rSet = binSplitDataSet(testData,tree['spInd'],tree['spVal'])
+    if isTree(tree['left']):
+        tree['left'] = prune(tree['left'],lSet)
+    if isTree(tree['right']):
+        tree['right'] = prune(tree['right'], rSet)
+    if not isTree(tree['left']) and not isTree(tree['right']):
+        lSet,rSet = binSplitDataSet(testData,tree['spInd'],tree['spVal'])
+        errorNoMerge = sum(pow(lSet[:,-1]-tree['left'],2))
+
+
 if __name__ == '__main__':
     pass
