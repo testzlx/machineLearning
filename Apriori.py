@@ -49,6 +49,7 @@ def aprioriGen(Lk,k):
 def apriori(dataSet,minSupport = 0.5):
     C1=createC1(dataSet)
     D = map(set,dataSet)
+    #todo map(set,集合)为啥只能做一次遍历，第二次遍历就为空集合了
     dataList2 = list(D)
     L1,supportData = scanD(dataList2,C1,minSupport)
     L = [L1]
