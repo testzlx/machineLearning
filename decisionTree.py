@@ -32,7 +32,7 @@ def splitDataSet(dataSet,axis,value):
             retDataSet.append(reducedfeatVec)
     return retDataSet
 
-def chooseBestFeatureToSplit(dataset):
+def chooseBestFeatureToSplit(dataSet):
     numFeatures = len(dataSet[0])-1
     baseEntropy = calcShannonEnt(dataSet)
     bestInfoGain = 0.0;bestFeature = -1

@@ -54,11 +54,12 @@ def classifyNB(vec2Classify,p0Vec,p1Vec,pClass1):
 if __name__ == '__main__':
         dataSet,classList = loadDataSet();
         vocabList = createVocabList(dataSet)
-        #print(vocabList)
+        print(vocabList)
         trainMatrix = []
         for postingDoc in dataSet:
             trainMatrix.append(setOfWords2Vec(vocabList,postingDoc))
         p0Vect,p1Vect,pAbuseive = trainNB0(trainMatrix,classList)
+        print("p0Vect:{},p1Vect:{},pAbuseive:{}".format(p0Vect,p1Vect,pAbuseive))
         testEntry =['stupid','garbage']
         thisDoc = array(setOfWords2Vec(vocabList,testEntry))
         print(testEntry,'classify as:',classifyNB(thisDoc,p0Vect,p1Vect,pAbuseive))
