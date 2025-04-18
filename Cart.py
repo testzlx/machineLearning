@@ -1,16 +1,24 @@
-from numpy import *
+import numpy as np
+from numpy import mat, nonzero, shape, mean, var, inf
+
 class treeNode():
     def __init__(self,feat,val,right,left):
-        featureToSplitOn=feat
-        valueOfSplit=val
-        rightBranch = right
-        leftBranch = left
+        self.featureToSplitOn = feat
+        self.valueOfSplit = val
+        self.rightBranch = right
+        self.leftBranch = left
 def loadDataSet():
-    pass
+    dataMat = []
+    fr = open('ex00.txt')
+    for line in fr.readlines():
+        curLine = line.strip().split('\t')
+        fltLine = list(map(float, curLine))
+        dataMat.append(fltLine)
+    return mat(dataMat)
 def binSplitDataSet(dataset,feature,value):
-    mat0 = dataset[nonzero(dataset[:,feature] > value)[0],:][0]
-    mat1 = dataset[nonzero(dataset[:, feature] <= value)[0], :][0]
-    return mat0,mat1
+    mat0 = dataset[nonzero(dataset[:,feature] > value)[0],:]
+    mat1 = dataset[nonzero(dataset[:, feature] <= value)[0], :]
+    return mat0, mat1
 
 def chooseBestSplit(dataSet,leafType,errType,ops):
     tols = ops[0];tolN=ops[1]
@@ -20,7 +28,8 @@ def chooseBestSplit(dataSet,leafType,errType,ops):
     S=errType(dataSet)
     bestS = inf;bestIndex= 0;bestValue=0
     for featIndex in range(n-1):
-        for splitVal in set(dataSet[:,featIndex]):
+        uniqueVals = set(dataSet[:,featIndex].T.tolist()[0])
+        for splitVal in uniqueVals:
             mat0,mat1 = binSplitDataSet(dataSet,featIndex,splitVal)
             if (shape(mat0)[0] < tolN) or (shape(mat1)[0] <tolN) :
                 continue
@@ -67,7 +76,7 @@ def getMean(tree):
 
 def prune(tree,testData):
     if shape(testData)[0] == 0:
-        return  getMean(tree)
+        return getMean(tree)
     if (isTree(tree['right']) or isTree(tree['left'])):
         lSet,rSet = binSplitDataSet(testData,tree['spInd'],tree['spVal'])
     if isTree(tree['left']):
@@ -76,8 +85,25 @@ def prune(tree,testData):
         tree['right'] = prune(tree['right'], rSet)
     if not isTree(tree['left']) and not isTree(tree['right']):
         lSet,rSet = binSplitDataSet(testData,tree['spInd'],tree['spVal'])
-        errorNoMerge = sum(pow(lSet[:,-1]-tree['left'],2))
-
+        errorNoMerge = sum(np.power(lSet[:,-1]-tree['left'],2)) + sum(np.power(rSet[:,-1]-tree['right'],2))
+        treeMean = (tree['left'] + tree['right'])/2.0
+        errorMerge = sum(np.power(testData[:,-1]-treeMean,2))
+        if errorMerge < errorNoMerge:
+            print("merging")
+            return treeMean
+        else:
+            return tree
+    else:
+        return tree
 
 if __name__ == '__main__':
-    pass
+    # 加载数据
+    myDat = loadDataSet()
+    # 创建回归树
+    myTree = createTree(myDat, ops=(1,4))
+    print("回归树结构：", myTree)
+    
+    # 测试剪枝
+    testDat = loadDataSet()
+    prunedTree = prune(myTree, testDat)
+    print("剪枝后的树结构：", prunedTree)
