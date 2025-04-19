@@ -7,11 +7,11 @@ class treeNode():
         self.valueOfSplit = val
         self.rightBranch = right
         self.leftBranch = left
-def loadDataSet():
+def loadDataSet(fileName):
     dataMat = []
-    fr = open('ex00.txt')
+    fr = open(fileName)
     for line in fr.readlines():
-        curLine = line.strip().split('\t')
+        curLine = line.strip().split()
         fltLine = list(map(float, curLine))
         dataMat.append(fltLine)
     return mat(dataMat)
@@ -97,13 +97,39 @@ def prune(tree,testData):
         return tree
 
 if __name__ == '__main__':
-    # 加载数据
-    myDat = loadDataSet()
-    # 创建回归树
+    # 测试单特征数据集
+    print("\n===== 测试单特征数据集 =====")
+    myDat = loadDataSet('ex00.txt')
+    print("数据集形状:", np.shape(myDat))
+    print("数据集前5行:\n", myDat[:5,:])
     myTree = createTree(myDat, ops=(1,4))
     print("回归树结构：", myTree)
     
     # 测试剪枝
-    testDat = loadDataSet()
-    prunedTree = prune(myTree, testDat)
+    prunedTree = prune(myTree, myDat)
     print("剪枝后的树结构：", prunedTree)
+    
+    
+
+    
+    # 测试大规模数据集
+    print("\n===== 测试大规模数据集 =====")
+    largeDat = loadDataSet('regression_data.txt')
+    print("数据集形状:", np.shape(largeDat))
+    print("数据集前5行:\n", largeDat[:5,:])
+    
+    # 创建回归树（使用较大的ops参数以避免过拟合）
+    largeTree = createTree(largeDat, ops=(3,10))
+    print("回归树结构：", largeTree)
+    
+    # 随机抽取部分数据作为测试集（为了简化，我们使用前80行作为训练集，后20行作为测试集）
+    trainData = largeDat[:80,:]
+    testData = largeDat[80:,:]
+    
+    # 基于训练集创建树
+    trainTree = createTree(trainData, ops=(3,10))
+    print("基于训练集的树结构：", trainTree)
+    
+    # 对树进行剪枝
+    prunedLargeTree = prune(trainTree, testData)
+    print("剪枝后的树结构：", prunedLargeTree)
